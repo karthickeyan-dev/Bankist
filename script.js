@@ -6,7 +6,7 @@
 
 // Data
 const account1 = {
-  owner: "John Doe",
+  owner: "John Snow",
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
@@ -61,16 +61,38 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = "";
+  movements.forEach(function (movement, i) {
+    const type = movement > 0 ? "deposit" : "withdrawal";
+    const html = `
+    <div class="movements__row">
+      <div class="movements__type movements__type--${type}">2 ${type}</div>
+      <div class="movements__value">${movement}</div>
+    </div>
+    `;
+    containerMovements.insertAdjacentHTML("afterbegin", html);
+  });
+};
+displayMovements(account1.movements);
 
-const currencies = new Map([
-  ["USD", "United States dollar"],
-  ["EUR", "Euro"],
-  ["GBP", "Pound sterling"],
-]);
+///////////////////////////////////////////////////////////////////////
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+//* CHALLENGE #1
 
-/////////////////////////////////////////////////
+// const dogsJulia = [3, 5, 2, 12, 7];
+// const dogsKate = [4, 1, 15, 8, 3];
+
+// const checkDogs = function (dogsJulia, dogsKate) {
+//   const dogsJuliaCorrected = dogsJulia.slice(1, 3);
+//   const dogsAll = dogsJuliaCorrected.concat(dogsKate);
+//   dogsAll.forEach(function (dogAge, i) {
+//     console.log(
+//       `Dog number ${i + 1} is ${
+//         dogAge >= 3 ? `an adult and is ${dogAge} years old` : `still a puppy 🐶`
+//       }`
+//     );
+//   });
+// };
+
+// checkDogs(dogsJulia, dogsKate);
