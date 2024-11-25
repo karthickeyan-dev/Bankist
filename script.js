@@ -68,13 +68,27 @@ const displayMovements = function (movements) {
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">2 ${type}</div>
-      <div class="movements__value">${movement}</div>
+      <div class="movements__value">${movement}₹</div>
     </div>
     `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
 displayMovements(account1.movements);
+
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce(
+    (accumulator, movement) => accumulator + movement,
+    0
+  );
+  labelBalance.textContent = `${balance}₹`;
+};
+calcDisplayBalance(account1.movements);
+
+const deposits = account1.movements.filter((movement) => movement > 0);
+const withdrawals = account1.movements.filter((movement) => movement < 0);
+
+console.log(account1.movements, deposits, withdrawals);
 
 const createUsername = function (accs) {
   accs.forEach(function (acc) {
