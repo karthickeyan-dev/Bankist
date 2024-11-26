@@ -61,13 +61,15 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-const displayMovements = function (movements) {
+const displayMovements = function (acc) {
   containerMovements.innerHTML = "";
-  movements.forEach(function (movement, i) {
+  acc.movements.forEach(function (movement, i) {
     const type = movement > 0 ? "deposit" : "withdrawal";
     const html = `
     <div class="movements__row">
-      <div class="movements__type movements__type--${type}">2 ${type}</div>
+      <div class="movements__type movements__type--${type}">${
+      i + 1
+    } ${type}</div>
       <div class="movements__value">${movement}₹</div>
     </div>
     `;
@@ -75,38 +77,39 @@ const displayMovements = function (movements) {
   });
 };
 
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce(
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce(
     (accumulator, movement) => accumulator + movement,
     0
   );
-  labelBalance.textContent = `${balance}₹`;
+  labelBalance.textContent = `${acc.balance}₹`;
 };
 
 const calcDisplaySummary = function (acc) {
   const incomes = acc.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-
   const outcomes = acc.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-
   const interest = acc.movements
     .filter((mov) => mov > 0)
     .map((mov) => (mov * acc.interestRate) / 100)
     .filter((mov) => mov >= 1)
     .reduce((acc, mov) => acc + mov, 0);
-
   labelSumIn.textContent = `${incomes}₹`;
   labelSumOut.textContent = `${Math.abs(outcomes)}₹`;
   labelSumInterest.textContent = `${interest}₹`;
 };
 
-const deposits = account1.movements.filter((movement) => movement > 0);
-const withdrawals = account1.movements.filter((movement) => movement < 0);
-
-// console.log(account1.movements, deposits, withdrawals);
+const updateUI = function (acc) {
+  //Display Movements
+  displayMovements(acc);
+  //Display Balance
+  calcDisplayBalance(acc);
+  //Display Summary
+  calcDisplaySummary(acc);
+};
 
 const createUsername = function (accs) {
   accs.forEach(function (acc) {
@@ -119,35 +122,54 @@ const createUsername = function (accs) {
 };
 createUsername(accounts);
 
-let currentAccount;
+//Login function
+
+let currentAcc;
 
 btnLogin.addEventListener("click", function (e) {
   //To prevent form from submitting and reloading the page
   e.preventDefault();
-
-  currentAccount = accounts.find(
+  currentAcc = accounts.find(
     (acc) => acc.username === inputLoginUsername.value
   );
-
-  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+  if (currentAcc?.pin === Number(inputLoginPin.value)) {
     //Display UI and message
     labelWelcome.textContent = `Welcome Back, ${
-      currentAccount.owner.split(" ")[0]
+      currentAcc.owner.split(" ")[0]
     }`;
     containerApp.style.opacity = 100;
     //Clear input fields
     inputLoginUsername.value = inputLoginPin.value = "";
     inputLoginUsername.blur();
     inputLoginPin.blur();
+    //Update UI
+    updateUI(currentAcc);
+  }
+});
 
-    //Display Movements
-    displayMovements(currentAccount.movements);
+//Transfer Money
 
-    //Display Balance
-    calcDisplayBalance(currentAccount.movements);
-
-    //Display Summary
-    calcDisplaySummary(currentAccount);
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  console.log(amount, receiverAcc, currentAcc);
+  if (
+    amount > 0 &&
+    amount <= currentAcc.balance &&
+    receiverAcc &&
+    receiverAcc?.username !== currentAcc.username
+  ) {
+    currentAcc.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    //Update UI
+    updateUI(currentAcc);
+    //Clear input fields
+    inputTransferTo.value = inputTransferAmount.value = "";
+    inputTransferTo.blur();
+    inputTransferAmount.blur();
   }
 });
 
