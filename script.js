@@ -74,7 +74,6 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
-displayMovements(account1.movements);
 
 const calcDisplayBalance = function (movements) {
   const balance = movements.reduce(
@@ -83,20 +82,19 @@ const calcDisplayBalance = function (movements) {
   );
   labelBalance.textContent = `${balance}₹`;
 };
-calcDisplayBalance(account1.movements);
 
-const calcDisplaySummary = function (movements) {
-  const incomes = movements
+const calcDisplaySummary = function (acc) {
+  const incomes = acc.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  const outcomes = movements
+  const outcomes = acc.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  const interest = movements
+  const interest = acc.movements
     .filter((mov) => mov > 0)
-    .map((mov) => (mov * 1.2) / 100)
+    .map((mov) => (mov * acc.interestRate) / 100)
     .filter((mov) => mov >= 1)
     .reduce((acc, mov) => acc + mov, 0);
 
@@ -104,7 +102,6 @@ const calcDisplaySummary = function (movements) {
   labelSumOut.textContent = `${Math.abs(outcomes)}₹`;
   labelSumInterest.textContent = `${interest}₹`;
 };
-calcDisplaySummary(account1.movements);
 
 const deposits = account1.movements.filter((movement) => movement > 0);
 const withdrawals = account1.movements.filter((movement) => movement < 0);
@@ -121,6 +118,38 @@ const createUsername = function (accs) {
   });
 };
 createUsername(accounts);
+
+let currentAccount;
+
+btnLogin.addEventListener("click", function (e) {
+  //To prevent form from submitting and reloading the page
+  e.preventDefault();
+
+  currentAccount = accounts.find(
+    (acc) => acc.username === inputLoginUsername.value
+  );
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    //Display UI and message
+    labelWelcome.textContent = `Welcome Back, ${
+      currentAccount.owner.split(" ")[0]
+    }`;
+    containerApp.style.opacity = 100;
+    //Clear input fields
+    inputLoginUsername.value = inputLoginPin.value = "";
+    inputLoginUsername.blur();
+    inputLoginPin.blur();
+
+    //Display Movements
+    displayMovements(currentAccount.movements);
+
+    //Display Balance
+    calcDisplayBalance(currentAccount.movements);
+
+    //Display Summary
+    calcDisplaySummary(currentAccount);
+  }
+});
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -154,12 +183,10 @@ createUsername(accounts);
 //* CHALLENGE #2
 
 // const calcAverageHumanAge = function (dogAges) {
-//   const filteredHumanAge = dogAges
+//   const avgHumanAge = dogAges
 //     .map((age) => (age <= 2 ? age * 2 : 16 + age * 4))
-//     .filter((age) => age >= 18);
-//   const avgHumanAge =
-//     filteredHumanAge.reduce((acc, age) => acc + age, 0) /
-//     filteredHumanAge.length;
+//     .filter((age) => age >= 18)
+//     .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
 //   console.log(avgHumanAge);
 // };
 // calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
