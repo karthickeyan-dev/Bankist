@@ -85,10 +85,31 @@ const calcDisplayBalance = function (movements) {
 };
 calcDisplayBalance(account1.movements);
 
+const calcDisplaySummary = function (movements) {
+  const incomes = movements
+    .filter((mov) => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  const outcomes = movements
+    .filter((mov) => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  const interest = movements
+    .filter((mov) => mov > 0)
+    .map((mov) => (mov * 1.2) / 100)
+    .filter((mov) => mov >= 1)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  labelSumIn.textContent = `${incomes}₹`;
+  labelSumOut.textContent = `${Math.abs(outcomes)}₹`;
+  labelSumInterest.textContent = `${interest}₹`;
+};
+calcDisplaySummary(account1.movements);
+
 const deposits = account1.movements.filter((movement) => movement > 0);
 const withdrawals = account1.movements.filter((movement) => movement < 0);
 
-console.log(account1.movements, deposits, withdrawals);
+// console.log(account1.movements, deposits, withdrawals);
 
 const createUsername = function (accs) {
   accs.forEach(function (acc) {
@@ -121,3 +142,25 @@ createUsername(accounts);
 // };
 
 // checkDogs(dogsJulia, dogsKate);
+
+//? Finding max using reduce (NOTE - accumulator should be assigned to 1st value of array to avoid errors)
+
+// const max = account1.movements.reduce(
+//   (acc, mov) => (acc > mov ? acc : mov),
+//   account1.movements[0]
+// );
+// console.log(max);
+
+//* CHALLENGE #2
+
+// const calcAverageHumanAge = function (dogAges) {
+//   const filteredHumanAge = dogAges
+//     .map((age) => (age <= 2 ? age * 2 : 16 + age * 4))
+//     .filter((age) => age >= 18);
+//   const avgHumanAge =
+//     filteredHumanAge.reduce((acc, age) => acc + age, 0) /
+//     filteredHumanAge.length;
+//   console.log(avgHumanAge);
+// };
+// calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
+// calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]);
