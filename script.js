@@ -173,6 +173,45 @@ btnTransfer.addEventListener("click", function (e) {
   }
 });
 
+//Request Loan
+
+btnLoan.addEventListener("click", function (e) {
+  e.preventDefault();
+  const loanAmount = Number(inputLoanAmount.value);
+  if (
+    loanAmount > 0 &&
+    currentAcc.movements.some((mov) => mov >= 0.1 * loanAmount)
+  ) {
+    //Add Loan amount to movement
+    currentAcc.movements.push(loanAmount);
+    //Clear input fields
+    inputLoanAmount.value = "";
+    inputLoanAmount.blur();
+    // Update UI
+    updateUI(currentAcc);
+  }
+});
+
+//Close Account
+
+btnClose.addEventListener("click", function (e) {
+  e.preventDefault();
+  if (
+    inputCloseUsername.value === currentAcc.username &&
+    Number(inputClosePin.value) === currentAcc.pin
+  ) {
+    const index = accounts.findIndex(
+      (acc) => acc.username === currentAcc.username
+    );
+    accounts.splice(index, 1);
+    //Clear input fields
+    inputCloseUsername.value = inputClosePin.value = "";
+    inputCloseUsername.blur();
+    inputClosePin.blur();
+    //Hide UI
+    containerApp.style.opacity = 0;
+  }
+});
 ///////////////////////////////////////////////////////////////////////
 
 //* CHALLENGE #1
