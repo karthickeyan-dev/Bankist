@@ -5,11 +5,25 @@
 // BANKIST APP
 
 // Data
+
 const account1 = {
   owner: "John Snow",
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+  movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+
+  movementsDates: [
+    "2019-11-18T21:31:17.178Z",
+    "2019-12-23T07:42:02.383Z",
+    "2020-01-28T09:15:04.904Z",
+    "2020-04-01T10:17:24.185Z",
+    "2020-05-08T14:11:59.604Z",
+    "2020-05-27T17:01:17.194Z",
+    "2020-07-11T23:36:17.929Z",
+    "2020-07-12T10:51:36.790Z",
+  ],
+  currency: "EUR",
+  locale: "pt-PT", // de-DE
 };
 
 const account2 = {
@@ -17,23 +31,22 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+
+  movementsDates: [
+    "2019-11-01T13:15:33.035Z",
+    "2019-11-30T09:48:16.867Z",
+    "2019-12-25T06:04:23.907Z",
+    "2020-01-25T14:18:46.235Z",
+    "2020-02-05T16:33:06.386Z",
+    "2020-04-10T14:43:26.374Z",
+    "2020-06-25T18:49:59.371Z",
+    "2020-07-26T12:01:20.894Z",
+  ],
+  currency: "USD",
+  locale: "en-US",
 };
 
-const account3 = {
-  owner: "Steven Thomas Williams",
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
-  interestRate: 0.7,
-  pin: 3333,
-};
-
-const account4 = {
-  owner: "Sarah Smith",
-  movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
-  pin: 4444,
-};
-
-const accounts = [account1, account2, account3, account4];
+const accounts = [account1, account2];
 
 // Elements
 const labelWelcome = document.querySelector(".welcome");
@@ -73,7 +86,7 @@ const displayMovements = function (acc, sort = false) {
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-      <div class="movements__value">${movement}₹</div>
+      <div class="movements__value">${movement.toFixed(2)}₹</div>
     </div>
     `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
@@ -85,7 +98,7 @@ const calcDisplayBalance = function (acc) {
     (accumulator, movement) => accumulator + movement,
     0
   );
-  labelBalance.textContent = `${acc.balance}₹`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)}₹`;
 };
 
 const calcDisplaySummary = function (acc) {
@@ -100,9 +113,9 @@ const calcDisplaySummary = function (acc) {
     .map((mov) => (mov * acc.interestRate) / 100)
     .filter((mov) => mov >= 1)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}₹`;
-  labelSumOut.textContent = `${Math.abs(outcomes)}₹`;
-  labelSumInterest.textContent = `${interest}₹`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}₹`;
+  labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}₹`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}₹`;
 };
 
 const updateUI = function (acc) {
@@ -154,11 +167,11 @@ btnLogin.addEventListener("click", function (e) {
 
 btnTransfer.addEventListener("click", function (e) {
   e.preventDefault();
-  const amount = Number(inputTransferAmount.value);
+  const amount = +inputTransferAmount.value;
   const receiverAcc = accounts.find(
     (acc) => acc.username === inputTransferTo.value
   );
-  console.log(amount, receiverAcc, currentAcc);
+  // console.log(amount, receiverAcc, currentAcc);
   if (
     amount > 0 &&
     amount <= currentAcc.balance &&
@@ -180,7 +193,7 @@ btnTransfer.addEventListener("click", function (e) {
 
 btnLoan.addEventListener("click", function (e) {
   e.preventDefault();
-  const loanAmount = Number(inputLoanAmount.value);
+  const loanAmount = Math.floor(inputLoanAmount.value);
   if (
     loanAmount > 0 &&
     currentAcc.movements.some((mov) => mov >= 0.1 * loanAmount)
@@ -225,7 +238,7 @@ btnSort.addEventListener("click", function (e) {
 });
 ///////////////////////////////////////////////////////////////////////
 
-//* CHALLENGE #1
+//// CHALLENGE #1
 
 // const dogsJulia = [3, 5, 2, 12, 7];
 // const dogsKate = [4, 1, 15, 8, 3];
@@ -244,7 +257,7 @@ btnSort.addEventListener("click", function (e) {
 
 // checkDogs(dogsJulia, dogsKate);
 
-//? Finding max using reduce (NOTE - accumulator should be assigned to 1st value of array to avoid errors)
+//// Finding max using reduce (NOTE - accumulator should be assigned to 1st value of array to avoid errors)
 
 // const max = account1.movements.reduce(
 //   (acc, mov) => (acc > mov ? acc : mov),
@@ -252,7 +265,7 @@ btnSort.addEventListener("click", function (e) {
 // );
 // console.log(max);
 
-//* CHALLENGE #2
+//// CHALLENGE #2
 
 // const calcAverageHumanAge = function (dogAges) {
 //   const avgHumanAge = dogAges
@@ -263,3 +276,110 @@ btnSort.addEventListener("click", function (e) {
 // };
 // calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
 // calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]);
+
+// const totalDeposits = accounts
+//   .flatMap((acc) => acc.movements)
+//   .filter((mov) => mov > 0)
+//   .reduce((acc, mov) => acc + mov, 0);
+
+// // const totalDeposits = accounts.reduce(
+// //   (acc, account) =>
+// //     acc +
+// //     account.movements.reduce((acc, mov) => (mov > 0 ? acc + mov : acc), 0),
+// //   0
+// // );
+
+// const numDeposits1000 = accounts
+//   .flatMap((acc) => acc.movements)
+//   .reduce((acc, mov) => (mov >= 1000 ? ++acc : acc), 0);
+
+// const { deposits, withdrawals } = accounts
+//   .flatMap((acc) => acc.movements)
+//   .reduce(
+//     (acc, mov) => {
+//       // mov > 0 ? (acc.deposits += mov) : (acc.withdrawals += mov);
+//       acc[mov > 0 ? "deposits" : "withdrawals"] += mov;
+//       return acc;
+//     },
+//     { deposits: 0, withdrawals: 0 }
+//   );
+
+// console.log(totalDeposits);
+// console.log(numDeposits1000);
+// console.log(deposits, withdrawals);
+
+// const convertTitleCase = function (title) {
+//   const exceptions = ["a", "an", "and", "the", "but", "or", "on", "in", "with"];
+//   return title
+//     .toLowerCase()
+//     .split(" ")
+//     .map((word, i) =>
+//       exceptions.includes(word) && i !== 0
+//         ? word
+//         : word[0].toUpperCase() + word.slice(1)
+//     )
+//     .join(" ");
+// };
+
+// console.log(convertTitleCase("this is a nice title"));
+// console.log(convertTitleCase("and here is another TITLE with ANOther examPLE"));
+
+//// CHALLENGE #4
+
+// const dogs = [
+//   { weight: 22, curFood: 250, owners: ["Alice", "Bob"] },
+//   { weight: 8, curFood: 200, owners: ["Matilda"] },
+//   { weight: 13, curFood: 275, owners: ["Sarah", "John"] },
+//   { weight: 32, curFood: 340, owners: ["Michael"] },
+// ];
+
+// dogs.forEach((dog) => (dog.recFood = Math.trunc(dog.weight ** 0.75 * 28)));
+
+// dogs.forEach(
+//   (dog) =>
+//     (dog.withinLimit =
+//       dog.curFood > 0.9 * dog.recFood && dog.curFood < 1.1 * dog.recFood
+//         ? true
+//         : false)
+// );
+
+// console.log(dogs);
+
+// dogs.forEach((dog) => {
+//   if (dog.owners.includes("Sarah")) {
+//     console.log(
+//       `${
+//         dog.withinLimit
+//           ? "Eating within recommended limit"
+//           : "Not eating within the recommended limit"
+//       }`
+//     );
+//   }
+// });
+
+// const ownersEatTooMuch = dogs
+//   .filter((dog) => dog.curFood > dog.recFood)
+//   .flatMap((dog) => dog.owners);
+
+// const ownersEatTooLittle = dogs
+//   .filter((dog) => dog.curFood < dog.recFood)
+//   .flatMap((dog) => dog.owners);
+
+// console.log(ownersEatTooMuch, ownersEatTooLittle);
+
+// console.log(
+//   `${ownersEatTooMuch.join(" and ").concat("'s")} dogs eat too much!`
+// );
+// console.log(`${ownersEatTooLittle.join(" and ")}'s dogs eat too little!`);
+
+// console.log(dogs.some((dog) => dog.curFood === dog.recFood));
+// console.log(dogs.some((dog) => dog.withinLimit));
+
+// console.log(dogs.filter((dog) => dog.withinLimit));
+
+// console.log(dogs.slice().sort((a, b) => a.recFood - b.recFood));
+
+// const randomInt = (max, min) =>
+//   Math.floor(Math.random() * (max - min + 1)) + min;
+
+// console.log(randomInt(0, 10));
