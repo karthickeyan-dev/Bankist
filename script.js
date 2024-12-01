@@ -8,40 +8,36 @@
 
 const account1 = {
   owner: "John Snow",
-  movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
+  movements: [
+    { amount: 200, date: "2019-11-18T21:31:17.178Z" },
+    { amount: 455.23, date: "2019-12-23T07:42:02.383Z" },
+    { amount: -306.5, date: "2020-01-28T09:15:04.904Z" },
+    { amount: 25000, date: "2020-04-01T10:17:24.185Z" },
+    { amount: -642.21, date: "2020-05-08T14:11:59.604Z" },
+    { amount: -133.9, date: "2020-05-27T17:01:17.194Z" },
+    { amount: 79.97, date: "2020-07-11T23:36:17.929Z" },
+    { amount: 1300, date: "2020-07-12T10:51:36.790Z" },
+  ],
   interestRate: 1.2, // %
   pin: 1111,
-
-  movementsDates: [
-    "2019-11-18T21:31:17.178Z",
-    "2019-12-23T07:42:02.383Z",
-    "2020-01-28T09:15:04.904Z",
-    "2020-04-01T10:17:24.185Z",
-    "2020-05-08T14:11:59.604Z",
-    "2020-05-27T17:01:17.194Z",
-    "2020-07-11T23:36:17.929Z",
-    "2020-07-12T10:51:36.790Z",
-  ],
   currency: "EUR",
   locale: "pt-PT", // de-DE
 };
 
 const account2 = {
   owner: "Jessica Davis",
-  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+  movements: [
+    { amount: 5000, date: "2019-11-01T13:15:33.035Z" },
+    { amount: 3400, date: "2019-11-30T09:48:16.867Z" },
+    { amount: -150, date: "2019-12-25T06:04:23.907Z" },
+    { amount: -790, date: "2020-01-25T14:18:46.235Z" },
+    { amount: -3210, date: "2020-02-05T16:33:06.386Z" },
+    { amount: -1000, date: "2020-04-10T14:43:26.374Z" },
+    { amount: 8500, date: "2020-06-25T18:49:59.371Z" },
+    { amount: -30, date: "2020-07-26T12:01:20.894Z" },
+  ],
   interestRate: 1.5,
   pin: 2222,
-
-  movementsDates: [
-    "2019-11-01T13:15:33.035Z",
-    "2019-11-30T09:48:16.867Z",
-    "2019-12-25T06:04:23.907Z",
-    "2020-01-25T14:18:46.235Z",
-    "2020-02-05T16:33:06.386Z",
-    "2020-04-10T14:43:26.374Z",
-    "2020-06-25T18:49:59.371Z",
-    "2020-07-26T12:01:20.894Z",
-  ],
   currency: "USD",
   locale: "en-US",
 };
@@ -76,26 +72,31 @@ const inputClosePin = document.querySelector(".form__input--pin");
 
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = "";
+
   const movs = sort
-    ? acc.movements.slice().sort((a, b) => a - b)
+    ? acc.movements.slice().sort((a, b) => a.amount - b.amount)
     : acc.movements;
+
   movs.forEach(function (movement, i) {
-    const type = movement > 0 ? "deposit" : "withdrawal";
+    const movementDate = new Date(movement.date);
+    const type = movement.amount > 0 ? "deposit" : "withdrawal";
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-      <div class="movements__value">${movement.toFixed(2)}₹</div>
+      <div class="movements__date">${updateDate(movementDate)}</div>
+      <div class="movements__value">${movement.amount.toFixed(2)}₹</div>
     </div>
     `;
+
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
 
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce(
-    (accumulator, movement) => accumulator + movement,
+    (accumulator, movement) => accumulator + movement.amount,
     0
   );
   labelBalance.textContent = `${acc.balance.toFixed(2)}₹`;
@@ -103,19 +104,31 @@ const calcDisplayBalance = function (acc) {
 
 const calcDisplaySummary = function (acc) {
   const incomes = acc.movements
-    .filter((mov) => mov > 0)
-    .reduce((acc, mov) => acc + mov, 0);
+    .filter((mov) => mov.amount > 0)
+    .reduce((acc, mov) => acc + mov.amount, 0);
+
   const outcomes = acc.movements
-    .filter((mov) => mov < 0)
-    .reduce((acc, mov) => acc + mov, 0);
+    .filter((mov) => mov.amount < 0)
+    .reduce((acc, mov) => acc + mov.amount, 0);
+
   const interest = acc.movements
-    .filter((mov) => mov > 0)
-    .map((mov) => (mov * acc.interestRate) / 100)
+    .filter((mov) => mov.amount > 0)
+    .map((mov) => (mov.amount * acc.interestRate) / 100)
     .filter((mov) => mov >= 1)
     .reduce((acc, mov) => acc + mov, 0);
+
   labelSumIn.textContent = `${incomes.toFixed(2)}₹`;
   labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}₹`;
   labelSumInterest.textContent = `${interest.toFixed(2)}₹`;
+};
+
+//Get Date
+
+const updateDate = function (fullDate) {
+  const date = fullDate.getDate();
+  const month = fullDate.getMonth() + 1;
+  const year = fullDate.getFullYear();
+  return `${date}/${month}/${year}`;
 };
 
 const updateUI = function (acc) {
@@ -158,6 +171,9 @@ btnLogin.addEventListener("click", function (e) {
     inputLoginUsername.value = inputLoginPin.value = "";
     inputLoginUsername.blur();
     inputLoginPin.blur();
+    //Display current date
+    const currentDate = new Date();
+    labelDate.textContent = updateDate(currentDate);
     //Update UI
     updateUI(currentAcc);
   }
@@ -167,19 +183,20 @@ btnLogin.addEventListener("click", function (e) {
 
 btnTransfer.addEventListener("click", function (e) {
   e.preventDefault();
-  const amount = +inputTransferAmount.value;
+  const amountTransfer = +inputTransferAmount.value;
+  const time = new Date().toISOString();
   const receiverAcc = accounts.find(
     (acc) => acc.username === inputTransferTo.value
   );
-  // console.log(amount, receiverAcc, currentAcc);
+  // console.log(amountTransfer, receiverAcc, currentAcc);
   if (
-    amount > 0 &&
-    amount <= currentAcc.balance &&
+    amountTransfer > 0 &&
+    amountTransfer <= currentAcc.balance &&
     receiverAcc &&
     receiverAcc?.username !== currentAcc.username
   ) {
-    currentAcc.movements.push(-amount);
-    receiverAcc.movements.push(amount);
+    currentAcc.movements.push({ amount: -amountTransfer, date: time });
+    receiverAcc.movements.push({ amount: -amountTransfer, date: time });
     //Update UI
     updateUI(currentAcc);
     //Clear input fields
@@ -194,12 +211,13 @@ btnTransfer.addEventListener("click", function (e) {
 btnLoan.addEventListener("click", function (e) {
   e.preventDefault();
   const loanAmount = Math.floor(inputLoanAmount.value);
+  const time = new Date().toISOString();
   if (
     loanAmount > 0 &&
-    currentAcc.movements.some((mov) => mov >= 0.1 * loanAmount)
+    currentAcc.movements.some((mov) => mov.amount >= 0.1 * loanAmount)
   ) {
     //Add Loan amount to movement
-    currentAcc.movements.push(loanAmount);
+    currentAcc.movements.push({ amount: loanAmount, date: time });
     //Clear input fields
     inputLoanAmount.value = "";
     inputLoanAmount.blur();
@@ -229,6 +247,7 @@ btnClose.addEventListener("click", function (e) {
   }
 });
 
+//Sort button
 let sorted = false;
 
 btnSort.addEventListener("click", function (e) {
